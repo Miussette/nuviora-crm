@@ -1,0 +1,2 @@
+import { QuoteList } from '@/features/quotes/quote-list';
+export default async function Page({ params, searchParams }: { params: Promise<{ organizationSlug: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> }) { const { organizationSlug } = await params; const query = await searchParams; return <QuoteList slug={organizationSlug} customerId={typeof query.cliente === 'string' ? query.cliente : ''} />; }

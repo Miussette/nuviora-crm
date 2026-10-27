@@ -1,0 +1,24 @@
+@import 'tailwindcss';
+@source '../../../../packages/ui/src';
+@theme inline {
+  --color-primary: #7759a6;
+  --color-primary-dark: #604287;
+  --color-background: #f7f5fa;
+  --color-foreground: #292633;
+  --color-muted: #eeebf4;
+  --color-secondary: #686173;
+  --color-border: #ded8e7;
+  --color-accent: #d6b783;
+  --font-sans: 'Inter', 'Segoe UI', sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--color-background); color: var(--color-foreground); font-family: var(--font-sans); }
+button, a, input, select { -webkit-tap-highlight-color: transparent; }
+button { cursor: pointer; }
+input:not([type=checkbox]), select, textarea { width:100%; border:1px solid var(--color-border); border-radius:10px; padding:12px 14px; background:white; color:var(--color-foreground); }
+input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible, button:focus-visible { outline: 3px solid #7759a6; outline-offset:3px; }
+textarea { resize: vertical; }
+label { display:block; font-size:14px; font-weight:600; margin-bottom:7px; }
+.panel { background:white; border:1px solid var(--color-border); border-radius:20px; box-shadow:0 3px 12px #29263303; }
+.field-error { color:#a51d35; font-size:13px; margin-top:6px; }
+::selection { background:#ded1ed; }

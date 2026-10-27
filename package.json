@@ -1,0 +1,26 @@
+{
+  "name": "nuviora-gestion",
+  "private": true,
+  "packageManager": "pnpm@10.34.9",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @nuviora/domain build && pnpm -r --parallel dev",
+    "build": "pnpm -r build",
+    "lint": "eslint .",
+    "typecheck": "pnpm --filter @nuviora/domain build && pnpm -r typecheck",
+    "test": "pnpm --filter @nuviora/domain build && pnpm --filter @nuviora/api test",
+    "db:generate": "pnpm --filter @nuviora/api db:generate",
+    "db:migrate": "pnpm --filter @nuviora/api db:migrate",
+    "test:integration": "pnpm --filter @nuviora/domain build && pnpm --filter @nuviora/api test:integration"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@playwright/test": "1.58.0",
+    "eslint": "^9.39.0",
+    "prettier": "3.9.10",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.48.0"
+  }
+}

@@ -1,0 +1,14 @@
+packages:
+  - apps/*
+  - packages/*
+onlyBuiltDependencies:
+  - '@prisma/client'
+  - '@prisma/engines'
+  - prisma
+  - esbuild
+  - sharp
+  - unrs-resolver
+overrides:
+  deepmerge-ts: ^8.0.0
+  multer: ^2.5.0
+  js-yaml@>=5.0.0: ^5.4.1

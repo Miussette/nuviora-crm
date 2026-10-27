@@ -1,0 +1,2 @@
+import { QuoteDetail } from '@/features/quotes/quote-detail';
+export default async function Page({ params, searchParams }: { params: Promise<{ organizationSlug: string; id: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> }) { const { organizationSlug, id } = await params; const query = await searchParams; return <QuoteDetail slug={organizationSlug} id={id} initialShare={query.compartir === '1'} />; }
