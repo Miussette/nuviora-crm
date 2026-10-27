@@ -1,5 +1,6 @@
 import type { QuoteEventRecord } from "@nuviora/types";
 export const quoteEventLabels: Record<string, string> = {
+  CONVERTED: 'Operación creada desde cotización',
   CREATED: "Cotización creada",
   EDITED: "Borrador editado",
   SENT: "Cotización enviada",

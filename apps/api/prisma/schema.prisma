@@ -33,6 +33,11 @@ model User {
   activities ActivityLog[]
   createdQuotes Quote[]
   quoteEvents QuoteEvent[]
+  assignedOperations Operation[]
+  createdPayments Payment[] @relation("PaymentCreator")
+  reversedPayments Payment[] @relation("PaymentReverser")
+  operationEvents OperationEvent[]
+  sentInvitations Invitation[] @relation("InvitationSender")
 }
 model Session {
   id String @id @default(uuid()) @db.Uuid
@@ -75,12 +80,21 @@ model Organization {
   quotes Quote[]
   quoteSequence QuoteSequence?
   quoteBranding QuoteBranding?
+  operations Operation[]
+  operationSequence OperationSequence?
+  invitations Invitation[]
+  subscription Subscription?
+  address String? @db.VarChar(250)
+  commune String? @db.VarChar(100)
+  region String? @db.VarChar(100)
+  timeZone String @default("America/Santiago") @db.VarChar(100)
 }
 model Membership {
   id String @id @default(uuid()) @db.Uuid
   userId String @db.Uuid
   organizationId String @db.Uuid
   role Role @default(MEMBER)
+  deactivatedAt DateTime?
   user User @relation(fields: [userId], references: [id], onDelete: Restrict)
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   createdAt DateTime @default(now())
@@ -92,6 +106,7 @@ model OrganizationSettings {
   organizationId String @id @db.Uuid
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   businessType BusinessType @default(MIXED)
+  hiddenModules String[] @default([])
   updatedAt DateTime @updatedAt
 }
 model ActivityLog {
@@ -99,6 +114,7 @@ model ActivityLog {
   organizationId String @db.Uuid
   actorId String @db.Uuid
   action String
+  metadata Json?
   resourceId String? @db.Uuid
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   actor User @relation(fields: [actorId], references: [id], onDelete: Restrict)
@@ -139,6 +155,7 @@ model Customer {
   @@index([organizationId, rut])
   @@unique([id, organizationId])
   quotes Quote[]
+  operations Operation[]
 }
 model CatalogItem {
   id String @id @default(uuid()) @db.Uuid
@@ -160,6 +177,7 @@ model CatalogItem {
   @@index([organizationId, name, id])
   @@unique([id, organizationId])
   quoteItems QuoteItem[]
+  operationItems OperationItem[]
 }
 enum QuoteStatus {
   DRAFT
@@ -186,6 +204,7 @@ enum QuoteEventType {
   CANCELLED
   DUPLICATED
   FOLLOW_UP
+  CONVERTED
 }
 model QuoteSequence {
   organizationId String @id @db.Uuid
@@ -241,10 +260,12 @@ model Quote {
   approval QuoteApproval?
   shareTokens QuoteShareToken[]
   events QuoteEvent[]
+  operation Operation?
   @@unique([organizationId, number])
   @@unique([organizationId, requestKey])
   @@unique([id, organizationId])
   @@index([organizationId, status, expiryAt])
+  @@index([organizationId, sentAt])
   @@index([organizationId, customerId, createdAt])
 }
 model QuoteItem {
@@ -313,4 +334,166 @@ model QuoteEvent {
   metadata Json?
   createdAt DateTime @default(now())
   @@index([organizationId, quoteId, createdAt])
+}
+enum OperationType {
+  ORDER
+  WORK
+}
+enum OperationStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+enum PaymentMethod {
+  TRANSFER
+  CASH
+  CARD
+  OTHER
+}
+model OperationSequence {
+  organizationId String @id @db.Uuid
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  lastNumber Int @default(0)
+}
+model Operation {
+  id String @id @default(uuid()) @db.Uuid
+  organizationId String @db.Uuid
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  customerId String @db.Uuid
+  customer Customer @relation(fields: [customerId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  customerName String @db.VarChar(150)
+  customerSnapshot Json
+  quoteId String? @unique @db.Uuid
+  quote Quote? @relation(fields: [quoteId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  @@unique([quoteId, organizationId])
+  number String @db.VarChar(30)
+  type OperationType
+  status OperationStatus @default(PENDING)
+  version Int @default(1)
+  requestKey String @db.Uuid
+  requestHash String @db.VarChar(64)
+  issueDate DateTime @db.Date
+  dueDate DateTime? @db.Date
+  assignedUserId String? @db.Uuid
+  assignedUser User? @relation(fields: [assignedUserId], references: [id], onDelete: Restrict)
+  description String @db.VarChar(5000)
+  instructions String? @db.VarChar(5000)
+  internalNotes String? @db.VarChar(5000)
+  subtotal Decimal @db.Decimal(18, 2)
+  discountTotal Decimal @db.Decimal(18, 2)
+  taxableBase Decimal @db.Decimal(18, 2)
+  exemptBase Decimal @db.Decimal(18, 2)
+  netTotal Decimal @db.Decimal(18, 2)
+  taxTotal Decimal @db.Decimal(18, 2)
+  total Decimal @db.Decimal(18, 2)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  items OperationItem[]
+  payments Payment[]
+  events OperationEvent[]
+  @@unique([id, organizationId])
+  @@unique([organizationId, number])
+  @@unique([organizationId, requestKey])
+  @@index([organizationId, status, issueDate])
+  @@index([organizationId, issueDate])
+  @@index([organizationId, customerId, createdAt])
+  @@index([assignedUserId, organizationId])
+}
+model OperationItem {
+  id String @id @default(uuid()) @db.Uuid
+  organizationId String @db.Uuid
+  operationId String @db.Uuid
+  operation Operation @relation(fields: [operationId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  catalogItemId String? @db.Uuid
+  catalogItem CatalogItem? @relation(fields: [catalogItemId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  name String @db.VarChar(150)
+  description String? @db.VarChar(5000)
+  unit String @db.VarChar(50)
+  quantity Decimal @db.Decimal(12,4)
+  unitPrice Decimal @db.Decimal(18,2)
+  discount Decimal @db.Decimal(5,2)
+  taxMode TaxMode
+  taxRate Decimal @db.Decimal(5,2)
+  subtotal Decimal @db.Decimal(18,2)
+  discountAmount Decimal @db.Decimal(18,2)
+  netAmount Decimal @db.Decimal(18,2)
+  taxAmount Decimal @db.Decimal(18,2)
+  lineTotal Decimal @db.Decimal(18,2)
+  position Int
+  @@unique([operationId, position])
+  @@index([organizationId, operationId])
+}
+model Payment {
+  id String @id @default(uuid()) @db.Uuid
+  organizationId String @db.Uuid
+  operationId String @db.Uuid
+  operation Operation @relation(fields: [operationId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  amount Decimal @db.Decimal(18,2)
+  method PaymentMethod
+  reference String? @db.VarChar(150)
+  paidAt DateTime @db.Date
+  notes String? @db.VarChar(2000)
+  requestKey String @db.Uuid
+  requestHash String @db.VarChar(64)
+  createdById String @db.Uuid
+  createdBy User @relation("PaymentCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt DateTime @default(now())
+  reversedAt DateTime?
+  reversedById String? @db.Uuid
+  reversedBy User? @relation("PaymentReverser", fields: [reversedById], references: [id], onDelete: Restrict)
+  reversalReason String? @db.VarChar(1000)
+  @@unique([organizationId, requestKey])
+  @@unique([id, organizationId])
+  @@index([organizationId, operationId, reversedAt])
+  @@index([organizationId, paidAt])
+}
+model OperationEvent {
+  id String @id @default(uuid()) @db.Uuid
+  organizationId String @db.Uuid
+  operationId String @db.Uuid
+  operation Operation @relation(fields: [operationId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  eventType String @db.VarChar(40)
+  actorId String @db.Uuid
+  actor User @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  metadata Json
+  createdAt DateTime @default(now())
+  @@index([organizationId, operationId, createdAt])
+}
+enum SubscriptionPlan {
+  EMPRENDE
+  NEGOCIO
+  EQUIPO
+}
+enum InvitationKind {
+  MEMBER
+  OWNERSHIP
+}
+model Subscription {
+  organizationId String @id @db.Uuid
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  plan SubscriptionPlan @default(EQUIPO)
+  status String @default("UNCONFIGURED") @db.VarChar(30)
+  renewalAt DateTime?
+  provider String? @db.VarChar(100)
+  providerSubscriptionId String? @db.VarChar(200)
+  updatedAt DateTime @updatedAt
+}
+model Invitation {
+  id String @id @default(uuid()) @db.Uuid
+  organizationId String @db.Uuid
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  email String @db.VarChar(254)
+  role Role @default(MEMBER)
+  kind InvitationKind @default(MEMBER)
+  tokenHash String @unique @db.VarChar(64)
+  createdById String @db.Uuid
+  createdBy User @relation("InvitationSender", fields: [createdById], references: [id], onDelete: Restrict)
+  expiresAt DateTime
+  revokedAt DateTime?
+  acceptedAt DateTime?
+  deliveredAt DateTime?
+  createdAt DateTime @default(now())
+  @@index([organizationId, email, expiresAt])
+  @@index([organizationId, createdAt])
 }

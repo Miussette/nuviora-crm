@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { CustomerQuotes } from "@/features/quotes/customer-quotes";
+import { CustomerOperations } from '@/features/operations/operations-list';
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -139,20 +140,7 @@ export function ResourceDetail({
         <CustomerQuotes slug={slug} customerId={id} />
       )}
       {resource === "customers" && (
-        <section className="mt-7 max-w-4xl">
-          <h2 className="mb-4 font-semibold">Información comercial</h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {["Operaciones", "Pagos", "Historial comercial"].map((title) => (
-              <div className="panel p-5" key={title}>
-                <h3 className="text-sm font-medium">{title}</h3>
-                <p className="mt-2 text-xs leading-5 text-secondary">
-                  Disponible al implementar el módulo correspondiente. No hay
-                  información comercial para mostrar en esta fase.
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
+        <CustomerOperations slug={slug} customerId={id} />
       )}
       {archive && (
         <ConfirmDialog

@@ -1,8 +1,10 @@
 import { Controller, Get, Module } from "@nestjs/common";
 import { APP_GUARD } from "@nestjs/core";
-import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
+import { ThrottlerModule } from "@nestjs/throttler";
+import {SessionThrottlerGuard} from './common/session-throttler.guard';
 import { LoggerModule } from "nestjs-pino";
 import { PrismaService } from "./database/prisma.service";
+import {DemoController} from './common/demo.controller';
 import { AuthGuard } from "./common/auth.guard";
 import { AuthController } from "./modules/auth/auth.controller";
 import { AuthService } from "./modules/auth/auth.service";
@@ -24,6 +26,13 @@ import { QuoteWriterService } from "./modules/quotes/quote-writer.service";
 import { QuoteWorkflowService } from "./modules/quotes/quote-workflow.service";
 import { QuoteBrandingService } from "./modules/quotes/quote-branding.service";
 import { QuotePdfService } from "./modules/quotes/quote-pdf.service";
+import { OperationsService } from './modules/operations/operations.service';
+import {AdminService} from './modules/administration/admin.service';
+import {PlanService} from './modules/administration/plan.service';
+import {CurrentOrganizationController,InvitationsController,SubscriptionsController} from './modules/administration/admin.controller';
+import {AnalyticsService} from './modules/analytics/analytics.service';
+import {DashboardController,ReportsController} from './modules/analytics/analytics.controller';
+import { OperationsController, PaymentsController, QuoteConversionController, ReceivablesController } from './modules/operations/operations.controller';
 @Controller("health")
 class HealthController {
   constructor(private readonly db: PrismaService) {}
@@ -56,6 +65,9 @@ class HealthController {
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 30 }]),
   ],
   controllers: [
+    DemoController,
+    CurrentOrganizationController, InvitationsController, SubscriptionsController, DashboardController, ReportsController,
+    OperationsController, PaymentsController, QuoteConversionController, ReceivablesController,
     HealthController,
     AuthController,
     OrganizationsController,
@@ -66,6 +78,8 @@ class HealthController {
     QuoteBrandingController,
   ],
   providers: [
+    AdminService, PlanService, AnalyticsService,
+    OperationsService,
     PrismaService,
     AuthGuard,
     AuthService,
@@ -79,7 +93,7 @@ class HealthController {
     QuoteWorkflowService,
     QuoteBrandingService,
     QuotePdfService,
-    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: SessionThrottlerGuard },
   ],
 })
 export class AppModule {}

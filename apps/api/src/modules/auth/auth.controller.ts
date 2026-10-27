@@ -15,7 +15,7 @@ export class AuthController {
   @Post('register') async register(@Body() dto: RegisterDto, @Res({ passthrough: true }) res: Response) { return this.cookie(res, await this.auth.register(dto)); }
   @Post('login') async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) { return this.cookie(res, await this.auth.login(dto)); }
   @Get('me') @UseGuards(AuthGuard)
-  me(@Req() req: AuthRequest) { return this.db.user.findUniqueOrThrow({ where: { id: req.userId }, select: { id: true, name: true, email: true, emailVerifiedAt: true, memberships: { select: { role: true, organization: { include: { settings: true } } } } } }); }
+  me(@Req() req: AuthRequest) { return this.db.user.findUniqueOrThrow({ where: { id: req.userId }, select: { id: true, name: true, email: true, emailVerifiedAt: true, memberships: { where: {deactivatedAt:null}, select: { role: true, organization: { include: { settings: true } } } } } }); }
   @Post('logout') @UseGuards(AuthGuard)
   async logout(@Req() req: AuthRequest, @Res({ passthrough: true }) res: Response) {
     const cookies = req.cookies as Record<string, string>;

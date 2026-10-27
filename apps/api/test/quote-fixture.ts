@@ -185,6 +185,13 @@ export async function quoteFixture() {
   async function cleanup() {
     const orgIds = organizations.map((item) => item.id);
     try {
+      await db.invitation.deleteMany({ where: { organizationId: { in: orgIds } } });
+      await db.subscription.deleteMany({ where: { organizationId: { in: orgIds } } });
+      await db.payment.deleteMany({ where: { organizationId: { in: orgIds } } });
+      await db.operationEvent.deleteMany({ where: { organizationId: { in: orgIds } } });
+      await db.operationItem.deleteMany({ where: { organizationId: { in: orgIds } } });
+      await db.operation.deleteMany({ where: { organizationId: { in: orgIds } } });
+      await db.operationSequence.deleteMany({ where: { organizationId: { in: orgIds } } });
       await db.quoteApproval.deleteMany({
         where: { organizationId: { in: orgIds } },
       });

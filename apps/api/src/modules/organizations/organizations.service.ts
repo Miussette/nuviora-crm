@@ -7,7 +7,7 @@ import { OrganizationDto } from './organization.dto';
 export class OrganizationsService {
   constructor(private readonly db: PrismaService) {}
   async resolve(userId: string, slug: string, manage = false) {
-    const membership = await this.db.membership.findFirst({ where: { userId, organization: { slug } }, include: { organization: { include: { settings: true } } } });
+    const membership = await this.db.membership.findFirst({ where: { userId, deactivatedAt: null, organization: { slug } }, include: { organization: { include: { settings: true } } } });
     if (!membership) throw new NotFoundException('Empresa no encontrada');
     if (manage && !canManage(membership.role)) throw new ForbiddenException('No tienes permiso para administrar esta empresa');
     return membership;

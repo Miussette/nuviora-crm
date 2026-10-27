@@ -12,6 +12,13 @@ export async function resourceFixture() {
     const organizationIds = orgs.map((org) => org.id);
     try {
       const where = { organizationId: { in: organizationIds } };
+      await db.invitation.deleteMany({ where });
+      await db.subscription.deleteMany({ where });
+      await db.payment.deleteMany({ where });
+      await db.operationEvent.deleteMany({ where });
+      await db.operationItem.deleteMany({ where });
+      await db.operation.deleteMany({ where });
+      await db.operationSequence.deleteMany({ where });
       await db.quoteApproval.deleteMany({ where });
       await db.quoteEvent.deleteMany({ where });
       await db.quoteShareToken.deleteMany({ where });

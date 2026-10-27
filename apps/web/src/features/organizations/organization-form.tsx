@@ -9,7 +9,8 @@ import { Button } from '@nuviora/ui/button';
 import { toast } from 'sonner';
 import { api } from '@/services/api';
 import { useUnsaved } from '@/hooks/use-unsaved';
-const schema = z.object({ name: z.string().trim().min(2, 'Ingresa al menos 2 caracteres').max(100), email: z.email('Ingresa un correo válido'), legalName: z.string().max(150), rut: z.string().max(20), phone: z.string().max(30), businessType: z.enum(['PRODUCTS', 'SERVICES', 'MIXED']) });
+import {isValidRut} from '@nuviora/domain';
+const schema = z.object({ name: z.string().trim().min(2, 'Ingresa al menos 2 caracteres').max(100), email: z.email('Ingresa un correo válido'), legalName: z.string().max(150), rut: z.string().max(20).refine(v=>!v||isValidRut(v),'Ingresa un RUT válido'), phone: z.string().max(30), businessType: z.enum(['PRODUCTS', 'SERVICES', 'MIXED']) });
 type Values = z.infer<typeof schema>;
 export function OrganizationForm({ organization }: { organization?: Organization }) {
   const router = useRouter(); const client = useQueryClient();

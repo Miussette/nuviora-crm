@@ -22,8 +22,12 @@ export function isValidMoney(value: string): boolean {
   return MONEY_PATTERN.test(value);
 }
 export function formatClp(value: string): string {
-  if (!isValidMoney(value)) return "—";
+  // Aggregates may exceed a single document's storage limit; formatting must retain them exactly.
+  if (!/^(?:0|[1-9]\d*)(?:\.\d{1,2})?$/.test(value)) return "—";
   const [integer = "0", fraction] = value.split(".");
   const grouped = BigInt(integer).toLocaleString("es-CL");
   return `$${grouped}${fraction && /[1-9]/.test(fraction) ? "," + fraction.padEnd(2, "0") : ""}`;
 }
+export * from './operations';
+export * from './analytics';
+export * from './plans';

@@ -14,6 +14,7 @@ import { QuoteStatusBadge } from "./quote-status";
 import { QuotePreview } from "./quote-preview";
 import { QuoteActions } from "./quote-actions";
 import { QuoteTimeline } from "./quote-timeline";
+import { Button } from '@nuviora/ui/button';
 export function QuoteDetail({
   slug,
   id,
@@ -104,12 +105,12 @@ export function QuoteDetail({
       {row.status === "APPROVED" && (
         <section className="mt-7 rounded-xl border border-border bg-muted p-5">
           <h2 className="text-sm font-semibold">
-            Lista para la siguiente etapa
+            Crear pedido o trabajo
           </h2>
           <p className="mt-2 text-sm leading-6 text-secondary">
-            La cotización aprobada conserva su versión y será la referencia para
-            crear una operación cuando se implemente ese módulo.
+            Crea una operación conservando los conceptos e importes aprobados. Si ya existe una vinculada, se abrirá esa operación.
           </p>
+          {write && <Button asChild className="mt-4"><Link href={`/app/${slug}/operaciones/nueva?cotizacion=${id}`}>Crear operación</Link></Button>}
         </section>
       )}
       <div className="mt-7">

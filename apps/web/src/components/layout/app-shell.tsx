@@ -11,15 +11,22 @@ import {
   Users,
   Package,
   FileText,
+  ClipboardList,
+  Wallet,
+  ChartNoAxesCombined,
+  SlidersHorizontal,
+  CreditCard,
   LogOut,
   Menu,
   Settings,
   X,
 } from "lucide-react";
-import type { Organization, Role } from "@nuviora/types";
+import type { Organization, Role, ModulesConfiguration } from "@nuviora/types";
+import { organizationApi } from "@/services/resources";
 import { api, ApiError } from "@/services/api";
 import { useProfile } from "@/hooks/use-profile";
 import { LoadingSkeleton } from "@/components/ui/states";
+import { DemoNotice } from "@/components/ui/demo-notice";
 export function AppShell({
   slug,
   children,
@@ -37,6 +44,15 @@ export function AppShell({
   const organization = useQuery({
     queryKey: ["organization", slug],
     queryFn: () => api<Organization & { role: Role }>(`/organizations/${slug}`),
+  });
+  const modules = useQuery({
+    queryKey: ["modules", slug],
+    queryFn: () =>
+      organizationApi<ModulesConfiguration>(
+        slug,
+        "/organizations/current/modules",
+      ),
+    enabled: !!organization.data,
   });
   useEffect(() => {
     if (
@@ -89,6 +105,9 @@ export function AppShell({
     { href: `${base}/clientes`, label: "Clientes", icon: Users },
     { href: `${base}/catalogo`, label: "Catálogo", icon: Package },
     { href: `${base}/cotizaciones`, label: "Cotizaciones", icon: FileText },
+    { href: `${base}/operaciones`, label: "Operaciones", icon: ClipboardList },
+    { href: `${base}/cobros`, label: "Cobros", icon: Wallet },
+    { href: `${base}/reportes`, label: "Reportes", icon: ChartNoAxesCombined },
     ...(org.role !== "MEMBER"
       ? [
           {
@@ -101,9 +120,39 @@ export function AppShell({
             label: "Usuarios y roles",
             icon: Settings,
           },
+          {
+            href: `${base}/configuracion/modulos`,
+            label: "Módulos",
+            icon: SlidersHorizontal,
+          },
         ]
       : []),
-  ];
+    ...(org.role === "OWNER"
+      ? [
+          {
+            href: `${base}/configuracion/suscripcion`,
+            label: "Plan y suscripción",
+            icon: CreditCard,
+          },
+        ]
+      : []),
+  ].filter((item) => {
+    const key: Record<string, string> = {
+      clientes: "customers",
+      catalogo: "catalog",
+      cotizaciones: "quotes",
+      operaciones: "operations",
+      cobros: "payments",
+      reportes: "reports",
+    };
+    const module = key[item.href.split("/").at(-1) ?? ""];
+    return (
+      !module ||
+      !modules.data ||
+      (modules.data.available.includes(module) &&
+        !modules.data.hiddenModules.includes(module))
+    );
+  });
   return (
     <div className="min-h-screen">
       <a
@@ -122,7 +171,7 @@ export function AppShell({
       <aside
         className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-border bg-white px-5 py-8 transition-transform lg:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full invisible lg:visible"}`}
       >
-        <div className="mb-12 flex items-center justify-between">
+        <div className="mb-8 flex shrink-0 items-center justify-between">
           <Link
             href={`${base}/inicio`}
             className="flex items-center gap-2 text-2xl font-semibold tracking-tight text-primary"
@@ -140,7 +189,10 @@ export function AppShell({
         <p className="mb-4 px-3 text-[10px] font-semibold uppercase tracking-[.2em] text-secondary">
           Espacio de trabajo
         </p>
-        <nav aria-label="Navegación principal" className="space-y-2">
+        <nav
+          aria-label="Navegación principal"
+          className="min-h-0 flex-1 space-y-1 overflow-y-auto"
+        >
           {nav.map((item) => (
             <Link
               key={item.href}
@@ -157,13 +209,13 @@ export function AppShell({
             </Link>
           ))}
         </nav>
-        <div className="mt-10 rounded-xl bg-background p-4">
+        <div className="mt-5 hidden shrink-0 rounded-xl bg-background p-4 min-[1000px]:block">
           <p className="text-sm font-medium">Un espacio para crecer</p>
           <p className="mt-2 text-xs leading-5 text-secondary">
-            Operaciones y cobros se incorporarán en las próximas fases.
+            Organiza tus pedidos, trabajos y cobros en un solo lugar.
           </p>
         </div>
-        <div className="mt-auto border-t border-border pt-5">
+        <div className="mt-5 shrink-0 border-t border-border pt-4">
           <Link
             href="/seleccionar-empresa"
             className="block px-3 py-2 text-sm text-secondary"
@@ -265,6 +317,7 @@ export function AppShell({
           id="contenido"
           className="mx-auto max-w-7xl px-5 py-8 md:px-10 md:py-10"
         >
+          <DemoNotice />
           {children}
         </main>
         <footer className="px-5 pb-8 text-xs text-secondary md:px-10">

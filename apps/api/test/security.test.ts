@@ -36,7 +36,7 @@ test('resolución incluye usuario y slug: rechaza recursos ajenos', async () => 
   const db = { membership: { findFirst: async (args: { where: unknown }) => { where = args.where; return null; } } };
   const service = new OrganizationsService(db as unknown as PrismaService);
   await assert.rejects(service.resolve('user-a', 'empresa-b'), { status: 404 });
-  assert.deepEqual(where, { userId: 'user-a', organization: { slug: 'empresa-b' } });
+    assert.deepEqual(where, { userId: 'user-a', deactivatedAt:null, organization: { slug: 'empresa-b' } });
 });
 test('MEMBER es bloqueado antes de actualizar la base', async () => {
   const db = { membership: { findFirst: async () => ({ role: 'MEMBER', organizationId: 'org-a', organization: {} }) } };

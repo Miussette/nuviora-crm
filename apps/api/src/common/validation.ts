@@ -40,6 +40,17 @@ const labels: Record<string, string> = {
   logoDataUrl: "Logo",
   accentColor: "Color",
   footer: "Pie de documento",
+  operationId: "Operación",
+  assignedUserId: "Responsable",
+  dueDate: "Fecha comprometida",
+  amount: "Monto recibido",
+  paidAt: "Fecha de pago",
+  method: "Método de pago",
+  reference: "Referencia",
+  instructions: "Instrucciones",
+  internalNotes: "Notas internas",
+  reason: "Motivo",
+  version: "Versión",
 };
 export function validationMessages(errors: ValidationError[]): string[] {
   return errors.flatMap((error) => [
@@ -64,7 +75,8 @@ export function validationMessages(errors: ValidationError[]): string[] {
         return `${label}: ingresa una fecha válida entre 2000 y 2199`;
       if (rule === "isUuid") return `${label}: selecciona un registro válido`;
       if (rule === "isArray" || rule === "arrayMaxSize")
-        return "La cotización debe contener una lista de hasta 100 ítems";
+        return "El detalle debe contener una lista de hasta 100 ítems";
+      if (rule === "arrayMinSize") return "Agrega al menos un concepto";
       if (rule === "equals") return `${label}: debes aceptar para continuar`;
       if (error.property === "unitPrice")
         return "Precio unitario: usa un texto decimal no negativo con hasta 16 enteros y 2 decimales";

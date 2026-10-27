@@ -1,0 +1,16 @@
+.git
+**/node_modules
+**/.next
+**/.next-*
+**/dist
+.pnpm-store
+test-results
+playwright-report
+coverage
+.env*
+**/.env*
+*.log
+**/*.tsbuildinfo
+.codex
+.aws
+.agents

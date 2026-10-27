@@ -1,2 +1,2 @@
-import { Members } from '@/features/organizations/settings';
-export default async function Page({ params }: { params: Promise<{ organizationSlug: string }> }) { return <Members slug={(await params).organizationSlug} />; }
+import { UsersTable } from '@/features/administration/users';
+export default async function Page({ params }: { params: Promise<{ organizationSlug: string }> }) { return <UsersTable slug={(await params).organizationSlug} />; }

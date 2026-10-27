@@ -11,7 +11,11 @@ export interface Organization {
   phone: string | null;
   country: string;
   currency: string;
-  settings: { businessType: BusinessType } | null;
+  address?:string|null;
+  commune?:string|null;
+  region?:string|null;
+  timeZone?:string;
+  settings: { businessType: BusinessType; hiddenModules?:string[] } | null;
 }
 export interface Membership {
   role: Role;
@@ -62,3 +66,5 @@ export interface Paginated<T> {
   page: number;
   pageSize: number;
 }
+export * from './operations';
+export * from './analytics';

@@ -19,6 +19,7 @@ export async function createApp() {
   app.use(json({ limit: "1mb" }));
   app.use(cookieParser());
   app.use((req: Request, res: Response, next: NextFunction) => {
+    res.set('Cache-Control','private, no-store');
     if (req.path.startsWith("/api/v1/public/quotes/")) {
       res.set({
         "Cache-Control": "no-store",

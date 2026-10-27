@@ -1,6 +1,6 @@
 # Nuviora Gestión
 
-SaaS B2B para Chile. Implementa las fundaciones de Fase 1, **Clientes y Catálogo de Fase 2** y **Cotizaciones profesionales de Fase 3**, con PDF y decisiones por enlace. No es una versión comercial lista para lanzamiento.
+SaaS B2B para Chile. Implementa las fases 1 a 5: acceso y empresas, clientes y catálogo, cotizaciones profesionales, operaciones y cobros, dashboard, reportes CSV, usuarios y configuración. No es una versión comercial lista para lanzamiento.
 
 ## Requisitos
 
@@ -79,22 +79,30 @@ Si ya tienes Microsoft Edge, puedes usarlo sin descargar otro navegador: `$env:P
 
 E2E usa por defecto **3100 y 3101**, con Next en `.next-e2e`, sin interferir con el desarrollo en 3000/3001. Cambia `E2E_WEB_PORT` / `E2E_API_PORT` si están ocupados. La opción `PLAYWRIGHT_REUSE_SERVER=1` reutiliza servidores de prueba que ya estén preparados en esos puertos.
 
-Las pruebas de integración requieren PostgreSQL migrado. E2E requiere también Mailpit y arranca su API compilada y Next en modo desarrollo aislado. Prueba autenticación, correo, Clientes, Catálogo y Cotizaciones, incluidos PDF, enlace, aprobación/rechazo, revocación, expiración, roles y móvil. La conversión a operación y los cobros quedan para las fases posteriores.
+Las pruebas de integración requieren PostgreSQL migrado. E2E requiere también Mailpit y arranca su API compilada y Next en modo desarrollo aislado. Prueba autenticación, correo, Clientes, Catálogo, Cotizaciones, Operaciones y Cobros, incluidos PDF, enlace, aprobación/rechazo, revocación, expiración, conversión histórica, abonos, reversos, roles y móvil.
 
 CI ejecuta lint, tipos, unitarias, integración y build con PostgreSQL. E2E local se documenta por separado; todavía no está agregado a CI.
 
 ## Estructura
 
-`apps/web`: Next.js App Router, React, Tailwind, React Query, React Hook Form, Zod y TanStack Table con tarjetas móviles. `apps/api`: NestJS, Prisma, DTOs, Swagger, logging JSON, PDFKit y Sharp para logos. `packages/domain`: validación de RUT, cálculo exacto y fechas chilenas de cotizaciones. `packages/ui`: base shadcn/ui personalizada. `packages/types`: contratos. `packages/config`: TypeScript estricto compartido. Recharts queda reservado para los indicadores futuros.
+`apps/web`: Next.js App Router, React, Tailwind, React Query, React Hook Form, Zod, Recharts y TanStack Table con tarjetas móviles. `apps/api`: NestJS, Prisma, DTOs, Swagger, logging JSON, PDFKit y Sharp para logos. `packages/domain`: RUT, dinero exacto, períodos y planes centralizados. `packages/ui`: base shadcn/ui personalizada. `packages/types`: contratos. `packages/config`: TypeScript estricto compartido.
 
 ## Alcance y límites
 
-Clientes, Catálogo y Cotizaciones funcionan con API y PostgreSQL. Operaciones, pagos y suscripciones siguen pendientes. No hay control de inventario, restauración de archivados ni eliminación física de registros comerciales. Los documentos comerciales enviados son de solo lectura; para una nueva emisión se duplican como borradores.
+Clientes, Catálogo, Cotizaciones, Operaciones, Cobros, dashboard y reportes funcionan con API y PostgreSQL. Hay invitaciones, roles, desactivación de accesos y transferencia segura de propiedad. Los planes tienen límites reales de acceso; la facturación recurrente queda preparada mediante un contrato de integración, sin cobros ni renovaciones inventadas. No hay control de inventario, restauración de archivados ni eliminación física de registros comerciales. Los documentos emitidos conservan sus snapshots históricos.
 
-SMTP local no entrega correos reales. Invitaciones, edición de roles, búsqueda contextual y notificaciones quedan pendientes. Roles existentes y su aplicación en servidor sí están implementados. La moneda y país se fijan a CLP/Chile para esta fase.
+SMTP local entrega las verificaciones e invitaciones únicamente en Mailpit. Las notificaciones generales y la búsqueda global contextual siguen pendientes. La moneda y país se mantienen en CLP/Chile; la zona horaria de la empresa configura los períodos del dashboard y los reportes.
 
 Antes de producción: revisión de seguridad y accesibilidad, términos y privacidad definitivos, versiones soportadas y auditoría de dependencias, HTTPS y proxy, SMTP real, limitador distribuido, respaldo/restauración y limpieza periódica de sesiones/tokens vencidos. La base y la entrega local no equivalen a una certificación de producción.
 
 Decisiones: [arquitectura](docs/architecture.md), [datos](docs/database-design.md), [permisos](docs/permissions.md) y [plan](docs/implementation-plan.md).
 
-Detener servicios conservando datos: `docker compose stop`. No se ejecuta despliegue ni se habilitan servicios pagos.
+Fase 4: [guía, reglas, endpoints y migraciones de Operaciones y Cobros](docs/phase-4-guide.md).
+
+Fase 5: [guía, fórmulas, permisos y endpoints](docs/phase-5-guide.md) y [entrega y validaciones](docs/phase-5-delivery.md).
+
+Fase 6 iniciada: [auditoría de preparación — NO-GO](docs/production-readiness.md), [plan de seis entregas](docs/phase-6-plan.md), [alternativas de despliegue y costos de referencia](docs/deployment.md) y [checklist de lanzamiento](docs/launch-checklist.md). Infraestructura, restauración de backups, monitoreo activo y suscripciones comerciales permanecen pendientes; la documentación no equivale a su activación ni validación.
+
+Demo: [configuración y publicación en Railway](docs/railway-demo.md). Incluye Dockerfile, migraciones y datos ficticios; requiere conectar la cuenta y publicar el servicio para obtener un enlace.
+
+Detener servicios locales conservando datos: `docker compose stop`.

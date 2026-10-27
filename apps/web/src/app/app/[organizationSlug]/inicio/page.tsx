@@ -1,2 +1,2 @@
-import { Workspace } from '@/features/organizations/workspace';
-export default async function Page({ params }: { params: Promise<{ organizationSlug: string }> }) { return <Workspace slug={(await params).organizationSlug} />; }
+import { Dashboard } from '@/features/analytics/dashboard';
+export default async function Page({ params }: { params: Promise<{ organizationSlug: string }> }) { return <Dashboard slug={(await params).organizationSlug} />; }
